@@ -28,14 +28,14 @@ Monitoring plays a crucial role in ensuring the health, performance, and reliabi
 ## What are we actually building
 The primary objective is to create a straightforward yet informative dashboard that offers valuable insights into the application's status. This dashboard will serve as a convenient tool to organize and present the most relevant logs, providing a quick overview of the application's health and performance.
 
-![Example Image](docs/images/general_stats.PNG)
-![Example Image](docs/images/requests1.PNG)
-![Example Image](docs/images/requests2.PNG)
-![Example Image](docs/images/logs.PNG)
+![Example Image](/images/general_stats.PNG)
+![Example Image](/images/requests1.PNG)
+![Example Image](/images/requests2.PNG)
+![Example Image](/images/logs.PNG)
 
 ## How it Works
 
-![Example Image](docs/images/monitoring_schema.png)
+![Example Image](/images/monitoring_schema.png)
 
 The monitoring setup relies on Docker and Docker Compose to manage the deployment of the services. You will use the provided `docker-compose.yml` file to orchestrate the entire monitoring stack.
 
@@ -83,8 +83,8 @@ Verify the installation by checking the version of Docker Compose:
 
 Next, clone the Monitoring FastAPI Applications repository to your local machine:
 ```
-    git clone https://github.kyndryl.net/EXPLO/fast-api-metrics-test.git
-    cd fast-api-metrics-test
+    git clone https://github.com/poltorres0999/monitoring-fastapi-sample.git
+    cd monitoring-fastapi-sample
 ```
 
 4. **Start the monitoring Stack**
