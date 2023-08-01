@@ -18,13 +18,13 @@ Welcome to the Monitoring FastAPI Applications project! This repository provides
 
 Monitoring plays a crucial role in ensuring the health, performance, and reliability of web applications. With this setup, you'll be able to collect logs, track metrics, visualize data, and set up alerts for potential issues in your FastAPI application. The monitoring stack consists of the following components:
 
-1. **Promtail:** A lightweight log collector specifically designed to work with Loki. It efficiently gathers logs from your FastAPI application's containers and forwards them to Loki for storage and analysis.
+- **Promtail:** A lightweight log collector specifically designed to work with Loki. It efficiently gathers logs from your FastAPI application's containers and forwards them to Loki for storage and analysis.
 
-2. **Loki:** A horizontally scalable, multi-tenant log aggregation system. It enables you to query, filter, and analyze logs in real-time using powerful LogQL queries.
+- **Loki:** A horizontally scalable, multi-tenant log aggregation system. It enables you to query, filter, and analyze logs in real-time using powerful LogQL queries.
 
-3. **Grafana:** A popular open-source platform for monitoring and observability. Grafana is used to create rich dashboards and visualizations based on the data from Loki and Prometheus.
+- **Grafana:** A popular open-source platform for monitoring and observability. Grafana is used to create rich dashboards and visualizations based on the data from Loki and Prometheus.
 
-4. **Prometheus:** A powerful time-series database and monitoring system. It collects and stores metrics exposed by the FastAPI application and other services, allowing you to set up custom alerts and recording rules, the date stored could be extracted by using its custom queryng languge PromQL.
+- **Prometheus:** A powerful time-series database and monitoring system. It collects and stores metrics exposed by the FastAPI application and other services, allowing you to set up custom alerts and recording rules, the date stored could be extracted by using its custom queryng languge PromQL.
 
 ## What are we actually building
 The primary objective is to create a straightforward yet informative dashboard that offers valuable insights into the application's status. This dashboard will serve as a convenient tool to organize and present the most relevant logs, providing a quick overview of the application's health and performance.
@@ -40,24 +40,25 @@ The primary objective is to create a straightforward yet informative dashboard t
 
 The monitoring setup relies on Docker and Docker Compose to manage the deployment of the services. You will use the provided `docker-compose.yml` file to orchestrate the entire monitoring stack.
 
-1. **FastAPI Application:** You'll start by creating and running a simple FastAPI application. This application will consist of several endpoints, including multiple types of HTTP requests (GET, POST, PUT, DELETE), and it will serve as an example web service that we want to monitor. The FastAPI application is equipped with a Prometheus instrumentator that will be responsible for generating the performance metrics exposed at the **"/metrics"** endpoint.
+- **FastAPI Application:** You'll start by creating and running a simple FastAPI application. This application will consist of several endpoints, including multiple types of HTTP requests (GET, POST, PUT, DELETE), and it will serve as an example web service that we want to monitor. The FastAPI application is equipped with a Prometheus instrumentator that will be responsible for generating the performance metrics exposed at the **"/metrics"** endpoint.
 
-2. **Promtail:** Promtail will be in charge of scraping, labeling and forwarding the logs to Loki, by sending them to the Loki's exposed enpoint **http://loki:3100/loki/api/v1/push**. The logs will be acquiered by scraping the files at **/var/logs/\*.log"** which will be provisoned to the container Promtail service container through a Docker volume. Promtail will be configured by making use of the `promtail-config.yaml`. 
+- **Promtail:** Promtail will be in charge of scraping, labeling and forwarding the logs to Loki, by sending them to the Loki's exposed enpoint **http://loki:3100/loki/api/v1/push**. The logs will be acquiered by scraping the files at **/var/logs/\*.log"** which will be provisoned to the container Promtail service container through a Docker volume. Promtail will be configured by making use of the `promtail-config.yaml`. 
 
-3. **Loki:** Loki will serve as the logs data source, wich will be consumed by Grafana at **http://loki:3100**. Loki will be configured by making use of the `loki-config.yaml`. 
+- **Loki:** Loki will serve as the logs data source, wich will be consumed by Grafana at **http://loki:3100**. Loki will be configured by making use of the `loki-config.yaml`. 
 
-4. **Prometheus:** Prometheus will act as the data source for Grafana to retrieve the FastAPI App metrics at **http://prometheus:9090**. These metrics will be acquired by periodically consulting the exposed "/metrics" endpoint at the FastAPI App. Prometheus will be configured by making use of the `prometheus.yaml`. 
+- **Prometheus:** Prometheus will act as the data source for Grafana to retrieve the FastAPI App metrics at **http://prometheus:9090**. These metrics will be acquired by periodically consulting the exposed "/metrics" endpoint at the FastAPI App. Prometheus will be configured by making use of the `prometheus.yaml`. 
 
-5. **Grafana:** Grafana will be used to visualize logs and metrics from Loki and Prometheus. The required dashboard configuration and Datasources will be provisioned as **IAC** (Infrastrucutre as a Code) the files in chage of doing so can be found at **/grafana/config/dasboards** and **/grafana/config/datasources**
+- **Grafana:** Grafana will be used to visualize logs and metrics from Loki and Prometheus. The required dashboard configuration and Datasources will be provisioned as **IAC** (Infrastrucutre as a Code) the files in chage of doing so can be found at **/grafana/config/dasboards** and **/grafana/config/datasources**
 
-6. **API metrics generator:** The `metrics/api_metrics_generator.py` file consists of a python scripts that periodically queries several endpoints of the FastAPI App to trigger the generation of metrics by the prometheus instrumentator.
+- **API metrics generator:** The `metrics/api_metrics_generator.py` file consists of a python scripts that periodically queries several endpoints of the FastAPI App to trigger the generation of metrics by the prometheus instrumentator.
 
-5. **API Log Generator:** The `metrics/log_generator.py` file consists of a python scripts that populates the logs folder with several files with fake logs.
+- **API Log Generator:** The `metrics/log_generator.py` file consists of a python scripts that populates the logs folder with several files with fake logs.
 
 ## Installation
+
 To get started with monitoring your FastAPI application using Promtail, Loki, Grafana, and Prometheus, follow the steps below to set up the required tools and services:
 
-1. **Install Docker**
+**Step 1: Install Docker**
 
 Docker is a containerization platform that allows you to run applications and services in isolated containers. It's a fundamental requirement for this monitoring setup.
 
@@ -68,7 +69,7 @@ After installing Docker, make sure it's running by executing the following comma
     docker-compose --version
 ```
 
-2. **Install Docker Compose**
+**Step 2: Install Docker Compose**
 
 Docker Compose is a tool for defining and running multi-container Docker applications using a docker-compose.yml file.
 
@@ -80,7 +81,7 @@ Verify the installation by checking the version of Docker Compose:
     docker-compose --version
 ```
 
-3. **Clone the Repository**
+**Step 3: Clone the Repository**
 
 Next, clone the Monitoring FastAPI Applications repository to your local machine:
 ```
@@ -88,14 +89,14 @@ Next, clone the Monitoring FastAPI Applications repository to your local machine
     cd monitoring-fastapi-sample
 ```
 
-4. **Start the monitoring Stack**
+**Step 4: Start the monitoring Stack**
 
 To initiate the monitoring stack, execute the following command. Since everything is configured as Infrastructure as Code (IAC), all the necessary services will be automatically set up and deployed, including the log and metrics generation scripts. This seamless process ensures a hassle-free setup of the entire monitoring ecosystem.
 ```bash
     docker-compose up
 ```
 
-5. **Check that everything is up and running**
+**Step 5: Check that everything is up and running**
 
 Go to http://localhost:3000 wich will open the Grafan application, log in using the default user and password admin:admin, once logged in
 navigate to Dashboards >> Fast API Metrics >> Fast API Metrics POC. It should show a dashboard similar to the one presented at [What are we actually building](#what-are-we-actually-building).
