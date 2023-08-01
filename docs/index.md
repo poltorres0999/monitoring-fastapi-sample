@@ -11,6 +11,7 @@
     - [Promtail](#promtail)
     - [Loki](#loki)
     - [Grafana IAC](#grafana-iac)
+      
 ## Introduction
 
 Welcome to the Monitoring FastAPI Applications project! This repository provides a simple and practical implementation of monitoring a FastAPI application using popular open-source monitoring tools: Promtail, Loki, Grafana, and Prometheus. The goal of this project is to showcase an effective monitoring setup that helps you gain insights into your FastAPI application's logs and metrics, enabling you to identify and troubleshoot issues quickly.
