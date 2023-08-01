@@ -48,7 +48,7 @@ The monitoring setup relies on Docker and Docker Compose to manage the deploymen
 
 - **Prometheus:** Prometheus will act as the data source for Grafana to retrieve the FastAPI App metrics at **http://prometheus:9090**. These metrics will be acquired by periodically consulting the exposed "/metrics" endpoint at the FastAPI App. Prometheus will be configured by making use of the `prometheus.yaml`. 
 
-- **Grafana:** Grafana will be used to visualize logs and metrics from Loki and Prometheus. The required dashboard configuration and Datasources will be provisioned as **IAC** (Infrastrucutre as a Code) the files in chage of doing so can be found at **/grafana/config/dasboards** and **/grafana/config/datasources**
+- **Grafana:** Grafana will be used to visualize logs and metrics from Loki and Prometheus. The required dashboard configuration and Datasources will be provisioned as **IAC** (Infrastrucutre as a Code) the files in chage of doing so can be found at **/grafana/config/dashboards** and **/grafana/config/datasources**
 
 - **API metrics generator:** The `metrics/api_metrics_generator.py` file consists of a python scripts that periodically queries several endpoints of the FastAPI App to trigger the generation of metrics by the prometheus instrumentator.
 
