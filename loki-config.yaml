@@ -1,0 +1,90 @@
+# Authentication Configuration
+auth_enabled: false
+# Indicates whether authentication is enabled or not. In this case, it's set to false.
+
+# Server Configuration
+server:
+  http_listen_port: 3100
+# Configures the HTTP port on which the Loki server listens for incoming requests.
+
+# Limits Configuration
+limits_config:
+  max_cache_freshness_per_query: "10m"
+  # The maximum time range for cache freshness allowed per query is set to 10 minutes.
+
+  split_queries_by_interval: 24h
+  # Queries are split into 24-hour intervals to parallelize query execution.
+
+  reject_old_samples: true
+  # Old samples (out of the retention period) are rejected from being ingested.
+
+  reject_old_samples_max_age: 168h
+  # Defines the maximum age (168 hours or 7 days) of samples before they are rejected.
+
+  retention_period: 360h
+  # The retention period for logs is set to 360 hours or 15 days.
+
+  max_query_series: 2500
+  # Limits the maximum number of series that a single query can match to 2500.
+
+  max_query_parallelism: 2
+  # Limits the maximum number of concurrent queries that can be executed in parallel to 2.
+
+# Frontend Configuration
+frontend:
+  max_outstanding_per_tenant: 2048
+  # Limits the number of outstanding requests per tenant to 2048.
+
+# Query Scheduler Configuration
+query_scheduler:
+  max_outstanding_requests_per_tenant: 2048
+  # Limits the number of outstanding requests per tenant in the query scheduler to 2048.
+
+# Common Configuration
+common:
+  path_prefix: /loki
+  # Sets the path prefix for Loki endpoints to "/loki".
+
+  # Storage Configuration
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      # Sets the directory path where chunks (data) are stored.
+
+      rules_directory: /loki/rules
+      # Sets the directory path where rules for log processing are stored.
+
+  replication_factor: 1
+  # Sets the replication factor for log data to 1 (no replication).
+
+  ring:
+    kvstore:
+      store: inmemory
+      # Defines the in-memory key-value store for the ring.
+
+# Schema Configuration
+schema_config:
+  configs:
+    - from: 2020-10-24
+      # Specifies the start date from which the following configuration applies.
+
+      store: boltdb-shipper
+      # The storage type for the logs is set to "boltdb-shipper".
+
+      object_store: filesystem
+      # The object storage type for log indexes is set to "filesystem".
+
+      schema: v11
+      # The schema version used for logs is set to "v11".
+
+      index:
+        prefix: index_
+        # Sets the prefix for log index files to "index_".
+
+        period: 24h
+        # Sets the period for log indexes to be created, in this case, 24 hours.
+
+# Ruler Configuration
+ruler:
+  alertmanager_url: http://localhost:9093
+  # Sets the URL of the Alertmanager to which alerts are sent.

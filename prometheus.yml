@@ -1,0 +1,11 @@
+# Global configuration settings applicable to all scrape jobs
+global:
+  scrape_interval: 15s # The interval at which Prometheus scrapes metrics from targets (e.g., 15 seconds)
+
+# Scrape configurations for individual jobs
+scrape_configs:
+  - job_name: "fastapi" # The name of the job, used to identify the metrics collected from this target
+
+    # Static configuration for this job, where targets are explicitly defined
+    static_configs:
+      - targets: ["fast-api-metrics-test:8000"] # The hostname and port of the target where the metrics are exposed

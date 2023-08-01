@@ -1,0 +1,194 @@
+version: '3.7'
+# Docker Compose version used in this file
+
+services:
+  fast-api-metrics-test:
+    # Name of the first service/container, based on a FastAPI application
+    container_name: fast-api-metrics-test
+    # Name of the container when it is running
+
+    build:
+      context: .
+      # Build context is set to the current directory
+      dockerfile: Dockerfile.fast-api
+      # Dockerfile used to build the image for this service
+
+    ports:
+      - 8000:8000
+      # Map port 8000 from the host to port 8000 in the container, allowing access to the FastAPI application
+
+    volumes:
+      - .:/mnt
+      # Mount the current directory (where the docker-compose.yml file is located) to /mnt directory in the container
+
+    working_dir: /mnt
+    # Set the working directory to /mnt within the container
+
+    networks:
+      - monitoring
+      # Connect the container to the monitoring network
+
+    environment:
+      TZ: Europe/Madrid
+      # Set the TZ environment variable to Europe/Madrid, the timezone used by the services
+
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        # Entry point command that will be executed when the container starts
+        pip install --no-cache-dir --upgrade -r requirements.txt
+        # Upgrade Python packages based on requirements.txt
+        uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+        # Run the FastAPI application using uvicorn with specified host and port
+        echo "OUCH"
+        # Print "OUCH" to the container's stdout (can be useful for testing)
+        tail -f /dev/null
+        # Keep the container running by following /dev/null (can be useful for testing)
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      # Health check command that checks the /health endpoint of the FastAPI application
+      interval: 30s
+      # Run the health check every 30 seconds
+      timeout: 10s
+      # Timeout for the health check is set to 10 seconds
+      retries: 3
+      # Retry the health check 3 times before considering the container unhealthy
+      start_period: 10s
+      # Wait 10 seconds after the container is started before running the first health check
+
+  metrics-generator:
+    # Name of the metrics-generator service/container
+    depends_on:
+      fast-api-metrics-test:
+        condition: service_healthy
+      # This service depends on fast-api-metrics-test and will wait until it is healthy before starting
+
+    container_name: metrics-generator
+    # Name of the container when it is running
+
+    build:
+      context: .
+      # Build context is set to the current directory
+      dockerfile: Dockerfile.metrics
+      # Dockerfile used to build the image for this service
+
+    volumes:
+      - ./logs:/var/logs
+      # Mount the ./logs directory on the host to /var/logs directory in the container
+
+    networks:
+      - monitoring
+      # Connect the container to the monitoring network
+
+    environment:
+      TZ: Europe/Madrid
+      # Set the TZ environment variable to Europe/Madrid, the timezone used by the services
+
+  promtail:
+    # Name of the promtail service/container
+    image: grafana/promtail:latest
+    # Use the latest version of the grafana/promtail image
+
+    volumes:
+      - ./promtail-config.yaml:/etc/promtail/config.yml
+      # Mount promtail-config.yaml from the host to /etc/promtail/config.yml in the container
+      - ./logs:/var/log
+      # Mount the ./logs directory on the host to /var/log directory in the container
+
+    networks:
+      - monitoring
+      # Connect the container to the monitoring network
+
+    environment:
+      - TZ=Europe/Madrid
+      # Set the TZ environment variable to Europe/Madrid, the timezone used by the services
+
+  loki:
+    # Name of the loki service/container
+    image: grafana/loki:2.8.0
+    # Use the grafana/loki image version 2.8.0
+
+    ports:
+      - "3100:3100"
+      # Map port 3100 from the host to port 3100 in the container, allowing access to Loki
+
+    command: -config.file=/etc/loki/local-config.yaml
+    # Run Loki with a specific configuration file
+
+    networks:
+      - monitoring
+      # Connect the container to the monitoring network
+
+    environment:
+      - TZ=Europe/Madrid
+      # Set the TZ environment variable to Europe/Madrid, the timezone used by the services
+
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+      # Mount loki-config.yaml from the host to /etc/loki/local-config.yaml in the container
+
+  grafana:
+    # Name of the grafana service/container
+    image: grafana/grafana
+    # Use the latest version of the grafana/grafana image
+
+    ports:
+      - "3000:3000"
+      # Map port 3000 from the host to port 3000 in the container, allowing access to Grafana
+
+    depends_on:
+      - loki
+      # This service depends on loki and will wait until it is running before starting
+
+    networks:
+      - monitoring
+      # Connect the container to the monitoring network
+
+    environment:
+      - TZ=Europe/Madrid
+      # Set the TZ environment variable to Europe/Madrid, the timezone used by the services
+
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/config:/etc/grafana/provisioning
+      # Mount the named volume grafana-storage to /var/lib/grafana in the container
+
+  prometheus:
+    # Name of the prometheus service/container
+    image: prom/prometheus:v2.30.3
+    # Use Prometheus image version 2.30.3
+
+    ports:
+      - "9090:9090"
+      # Map port 9090 from the host to port 9090 in the container, allowing access to Prometheus
+
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      # Mount prometheus.yml from the host to /etc/prometheus/prometheus.yml in the container (read-only)
+
+    networks:
+      - monitoring
+      # Connect the container to the monitoring network
+
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      # Run Prometheus with a specific configuration file
+      - "--storage.tsdb.path=/prometheus"
+      # Set the path for the Prometheus time-series database storage
+
+    environment:
+      - TZ=Europe/Madrid
+      # Set the TZ environment variable to Europe/Madrid, the timezone used by the services
+
+volumes:
+  grafana-storage:
+    driver: local
+    # Create a named volume called grafana-storage using the local driver
+    # This volume will be used to store Grafana data
+
+networks:
+  monitoring:
+    driver: bridge
+    # Create

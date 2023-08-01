@@ -1,0 +1,64 @@
+# Server configurations
+server:
+  http_listen_port: 9080  # HTTP port on which Promtail will listen for requests
+  grpc_listen_port: 0     # gRPC port, set to 0 to disable gRPC
+
+# Loki client configuration
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    # The URL where Loki's /loki/api/v1/push endpoint is located. Promtail will push logs to this endpoint.
+
+# Positions file configuration
+positions:
+  filename: /tmp/positions.yaml
+  # The file that stores the last positions of log files read by Promtail. Used for log persistence and resume.
+
+# Scrape configurations for log processing
+scrape_configs:
+  - job_name: fast-api-logs  # The name of the job, used to identify the log processing pipeline for this target.
+
+    # Pipeline stages for log processing
+    pipeline_stages:
+      # Regex stage to extract log components using named capture groups
+      - regex:
+          expression: '^(?P<log_timestamp>[\d-]+T[\d:.]+Z) \| (?P<log_level>\w+) \| Module: (?P<module>[^|]+) \| Function: (?P<function>[^|]+)\| (?P<message>.*)'
+          # Regular expression used to extract log components: timestamp, log_level, module, function, message
+
+      # Labels stage to define custom labels for the extracted log components
+      - labels:
+          log_level:   # Custom label "log_level" mapped to the extracted "log_level" from the regex stage
+          module:      # Custom label "module" mapped to the extracted "module" from the regex stage
+          function:    # Custom label "function" mapped to the extracted "function" from the regex stage
+
+      # Timestamp stage to parse and set the timestamp from the extracted "log_timestamp"
+      - timestamp:
+          source: log_timestamp
+          format: "RFC3339"
+          # Parsing the "log_timestamp" field and setting it as the timestamp in RFC3339 format
+
+      # Another regex stage to extract more log components using named capture groups
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z) \| (?P<log_level>\w+) \| (?P<method>\w+) (?P<uri>[^\s]+) \| Requested by: (?P<requested_by>[^|]+) Status: (?P<status>\d+) Duration: (?P<duration>\d+) ms'
+          # Regular expression used to extract log components: timestamp, log_level, method, uri, requested_by, status, duration
+
+      # Labels stage to define custom labels for the extracted log components
+      - labels:
+          log_level:   # Custom label "log_level" mapped to the extracted "log_level" from the regex stage
+          method:      # Custom label "method" mapped to the extracted "method" from the regex stage
+          uri:         # Custom label "uri" mapped to the extracted "uri" from the regex stage
+          status:      # Custom label "status" mapped to the extracted "status" from the regex stage
+
+      # Timestamp stage to parse and set the timestamp from the extracted "timestamp"
+      - timestamp:
+          source: log_timestamp
+          format: "RFC3339"
+          # Parsing the "log_timestamp" field and setting it as the timestamp in RFC3339 format
+
+    # Static configurations for this job, specifying the targets and labels
+    static_configs:
+      - targets:
+          - localhost  # The target from where logs are read. In this case, logs are read from the local machine.
+        labels:
+          job: fast-api-logs  # Custom label "job" mapped to "fast-api-logs" to identify this job in Loki
+          env: dev           # Custom label "env" mapped to "dev" indicating the environment where the logs come from
+          __path__: /var/log/logs.log  # The path to the log file that Promtail should scrape

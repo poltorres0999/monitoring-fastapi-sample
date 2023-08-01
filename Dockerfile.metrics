@@ -1,0 +1,17 @@
+# Use an official Python runtime as the base image
+FROM python:3.9
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the contents of the "metrics" folder to the working directory in the container
+COPY metrics /app/metrics
+
+# Copy the requirements file to the working directory in the container
+COPY requirements.metrics.txt /app
+
+# Install the Python libraries from the requirements file
+RUN pip install --no-cache-dir -r requirements.metrics.txt
+
+# Assuming your main Python script is called "main.py", you can specify it here
+CMD ["python", "metrics/main.py"]
